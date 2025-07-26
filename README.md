@@ -1,6 +1,21 @@
-# Welcome to your Expo app 👋
+# Dino Dash 🦖
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A Chrome Dino Game (T-Rex Runner) clone built with React Native and Expo!
+
+## About
+
+Dino Dash is a mobile version of the classic Chrome offline dinosaur game. Features include:
+- Tap to jump over obstacles
+- Automatic dino running
+- Score tracking
+- Game over and restart functionality
+- Built with React Native Game Engine and Matter.js physics
+
+## Tech Stack
+
+- **Frontend**: React Native + Expo
+- **Game Engine**: React Native Game Engine + Matter.js
+- **Physics**: Matter.js for collision detection and physics simulation
 
 ## Get started
 
@@ -25,15 +40,26 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## Game Features
 
-When you're ready, run:
+- **Dino Character**: Green rectangle that automatically runs
+- **Obstacles**: Cactus obstacles that spawn randomly
+- **Jump Mechanics**: Tap to jump over obstacles
+- **Scoring**: Time-based scoring system
+- **Collision Detection**: Game over when dino hits obstacle
+- **Restart**: Easy restart functionality
 
-```bash
-npm run reset-project
+## Project Structure
+
 ```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+/dino-dash
+  ├── /app                    # Expo Router pages
+  ├── /components            # Reusable components
+  │    └── /game            # Game-specific components
+  ├── /constants            # App constants
+  ├── /hooks               # Custom React hooks
+  └── /assets              # Images, fonts, etc.
+```
 
 ## Learn more
 
