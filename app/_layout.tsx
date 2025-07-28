@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import { ScoreProvider } from '@/contexts/ScoreContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RootLayout() {
@@ -19,11 +20,15 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
+      <ScoreProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(game)/game" options={{ headerShown: false }} />
+          <Stack.Screen name="(scores)/top-scores" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ScoreProvider>
     </ThemeProvider>
   );
 }

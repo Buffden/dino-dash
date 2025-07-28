@@ -4,11 +4,13 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
+import { useScoreContext } from '@/contexts/ScoreContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { highestScore, isLoading } = useScoreContext();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -49,6 +51,10 @@ export default function HomeScreen() {
     router.push('/(game)/game');
   };
 
+  const viewTopScores = () => {
+    router.push('/(scores)/top-scores');
+  };
+
   const renderDinoIcon = () => (
     <View style={styles.dinoIconContainer}>
       <View style={styles.dinoIcon}>
@@ -59,22 +65,34 @@ export default function HomeScreen() {
     </View>
   );
 
+  const renderHighScore = () => (
+    <View style={styles.highScoreContainer}>
+      <Text style={styles.highScoreIcon}>🏆</Text>
+      <View style={styles.highScoreTextContainer}>
+        <ThemedText style={styles.highScoreLabel}>High Score</ThemedText>
+        <ThemedText style={styles.highScoreValue}>
+          {isLoading ? '...' : highestScore.toLocaleString()}
+        </ThemedText>
+      </View>
+    </View>
+  );
+
   const renderInstructions = () => (
     <View style={styles.instructionsContainer}>
       <View style={styles.instructionItem}>
-        <View style={styles.instructionIcon}>👆</View>
+        <Text style={styles.instructionIcon}>👆</Text>
         <ThemedText style={styles.instructionText}>Tap to jump</ThemedText>
       </View>
       <View style={styles.instructionItem}>
-        <View style={styles.instructionIcon}>🌵</View>
+        <Text style={styles.instructionIcon}>🌵</Text>
         <ThemedText style={styles.instructionText}>Avoid obstacles</ThemedText>
       </View>
       <View style={styles.instructionItem}>
-        <View style={styles.instructionIcon}>⏱️</View>
+        <Text style={styles.instructionIcon}>⏱️</Text>
         <ThemedText style={styles.instructionText}>Survive longer</ThemedText>
       </View>
       <View style={styles.instructionItem}>
-        <View style={styles.instructionIcon}>🏆</View>
+        <Text style={styles.instructionIcon}>🏆</Text>
         <ThemedText style={styles.instructionText}>Beat your score!</ThemedText>
       </View>
     </View>
@@ -99,32 +117,46 @@ export default function HomeScreen() {
           {renderDinoIcon()}
           <ThemedText type="title" style={styles.title}>
             Dino Dash
-        </ThemedText>
+          </ThemedText>
           <ThemedText style={styles.subtitle}>
             Chrome Dino Game Clone
-        </ThemedText>
+          </ThemedText>
+          
+          {/* High Score Display */}
+          {renderHighScore()}
         </View>
 
         {/* Instructions */}
         <View style={styles.instructionsSection}>
           <ThemedText type="subtitle" style={styles.instructionsTitle}>
             How to Play
-        </ThemedText>
+          </ThemedText>
           {renderInstructions()}
         </View>
 
-        {/* Start Button */}
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <TouchableOpacity style={styles.startButton} onPress={startGame}>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+            <TouchableOpacity style={styles.startButton} onPress={startGame}>
+              <LinearGradient
+                colors={['#4CAF50', '#45A049']}
+                style={styles.buttonGradient}
+              >
+                <Text style={styles.startButtonText}>Start Game</Text>
+                <Text style={styles.startButtonSubtext}>Tap to begin!</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <TouchableOpacity style={styles.topScoresButton} onPress={viewTopScores}>
             <LinearGradient
-              colors={['#4CAF50', '#45A049']}
+              colors={['#FF9800', '#F57C00']}
               style={styles.buttonGradient}
             >
-              <Text style={styles.startButtonText}>Start Game</Text>
-              <Text style={styles.startButtonSubtext}>Tap to begin!</Text>
+              <Text style={styles.topScoresButtonText}>📊 Top Scores</Text>
             </LinearGradient>
           </TouchableOpacity>
-        </Animated.View>
+        </View>
 
         {/* Footer */}
         <View style={styles.footer}>
@@ -175,6 +207,38 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     color: '#34495E',
     fontWeight: '500',
+    marginBottom: 20,
+  },
+  highScoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  highScoreIcon: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  highScoreTextContainer: {
+    alignItems: 'center',
+  },
+  highScoreLabel: {
+    fontSize: 12,
+    color: '#2C3E50',
+    fontWeight: '600',
+    opacity: 0.8,
+  },
+  highScoreValue: {
+    fontSize: 20,
+    color: '#2C3E50',
+    fontWeight: 'bold',
   },
   instructionsSection: {
     flex: 1,
@@ -193,8 +257,22 @@ const styles = StyleSheet.create({
     color: '#34495E',
     fontWeight: '500',
   },
-  startButton: {
+  buttonContainer: {
+    gap: 15,
     marginBottom: 40,
+  },
+  startButton: {
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  topScoresButton: {
     borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: {
@@ -208,6 +286,11 @@ const styles = StyleSheet.create({
   startButtonText: {
     color: '#fff',
     fontSize: 24,
+    fontWeight: 'bold',
+  },
+  topScoresButtonText: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
   },
   footer: {
@@ -294,6 +377,7 @@ const styles = StyleSheet.create({
   instructionIcon: {
     fontSize: 28,
     marginRight: 15,
+    textAlign: 'center',
   },
   buttonGradient: {
     paddingVertical: 18,
@@ -339,4 +423,4 @@ const styles = StyleSheet.create({
     color: '#34495E',
     fontWeight: '500',
   },
-});
+}); 
