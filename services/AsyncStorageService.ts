@@ -121,7 +121,7 @@ export class AsyncStorageService {
       for (const key of keys) {
         const value = await AsyncStorage.getItem(key);
         if (value) {
-          totalSize += new Blob([value]).size;
+          totalSize += this.getUtf8ByteLength(value);
         }
       }
       
