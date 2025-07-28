@@ -101,7 +101,7 @@ const SimpleDinoGame: React.FC = () => {
       if (prev.gameOver) return prev;
 
       // Normalize physics updates to 60fps
-      const timeScale = Math.min(deltaTime / FRAME_TIME, 2); // Cap at 2x speed to prevent extreme variations
+      const timeScale = Math.min(deltaTime / FRAME_TIME, MAX_TIME_SCALE); // Cap at 2x speed to prevent extreme variations
 
       // Update dino physics
       let newDinoY = prev.dinoY + (prev.dinoVelocity * timeScale);
