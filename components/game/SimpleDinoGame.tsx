@@ -122,7 +122,7 @@ const SimpleDinoGame: React.FC = () => {
 
       // Spawn new obstacles (normalized to 60fps)
       const spawnChance = 0.02;
-      if (Math.random() < (spawnChance * timeScale) && newObstacles.length < 3) {
+      if (Math.random() < (spawnChance * timeScale) && newObstacles.length < MAX_OBSTACLES) {
         newObstacles.push({
           x: width,
           y: GROUND_Y,
