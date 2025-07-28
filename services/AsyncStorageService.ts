@@ -20,7 +20,14 @@ export class AsyncStorageService {
   private async setItem<T>(key: string, value: T): Promise<void> {
     try {
       const jsonValue = JSON.stringify(value);
+      console.log(`Saving to AsyncStorage ${key}:`, value);
+      console.log(`JSON value:`, jsonValue);
+      
       await AsyncStorage.setItem(key, jsonValue);
+      
+      // Verify the save by reading it back
+      const savedValue = await AsyncStorage.getItem(key);
+      console.log(`Verification - saved value for ${key}:`, savedValue);
       
       // Update cache
       this.cache.set(key, {
@@ -39,12 +46,17 @@ export class AsyncStorageService {
       // Check cache first for performance
       const cached = this.cache.get(key);
       if (cached && this.isCacheValid(cached)) {
+        console.log(`Cache hit for ${key}:`, cached.data);
         return cached.data as T;
       }
 
+      console.log(`Fetching from AsyncStorage: ${key}`);
       const jsonValue = await AsyncStorage.getItem(key);
+      console.log(`Raw AsyncStorage value for ${key}:`, jsonValue);
+      
       if (jsonValue !== null) {
         const data = JSON.parse(jsonValue) as T;
+        console.log(`Parsed data for ${key}:`, data);
         
         // Update cache
         this.cache.set(key, {
@@ -55,6 +67,7 @@ export class AsyncStorageService {
         
         return data;
       }
+      console.log(`No data found for ${key}`);
       return null;
     } catch (error) {
       console.error(`Error reading from AsyncStorage (${key}):`, error);
@@ -134,7 +147,23 @@ export class AsyncStorageService {
 
   // Cache management
   clearCache(): void {
+    console.log('Clearing AsyncStorage cache');
     this.cache.clear();
+  }
+
+  // Force refresh from AsyncStorage (useful for platform differences)
+  async forceRefresh(): Promise<void> {
+    console.log('Force refreshing from AsyncStorage');
+    this.cache.clear();
+    
+    // Test read all keys
+    const allKeys = await AsyncStorage.getAllKeys();
+    console.log('All AsyncStorage keys:', allKeys);
+    
+    for (const key of Object.values(STORAGE_KEYS)) {
+      const value = await AsyncStorage.getItem(key);
+      console.log(`Key ${key}:`, value);
+    }
   }
 
   getCacheStats(): { size: number; keys: string[] } {

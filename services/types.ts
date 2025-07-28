@@ -50,6 +50,7 @@ export interface ScoreContextActions {
   refreshScores: () => Promise<void>;
   clearScores: () => Promise<void>;
   getNextTargetScore: (currentScore: number) => number;
+  forceRefreshData: () => Promise<void>;
 }
 
 // Combined Context Type

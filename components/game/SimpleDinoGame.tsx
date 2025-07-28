@@ -14,6 +14,8 @@ interface GameState {
   gameOver: boolean;
   isJumping: boolean;
   gameStartTime: number;
+  shouldSaveScore?: boolean;
+  finalScore?: number;
 }
 
 const GRAVITY = 0.8;
@@ -64,6 +66,8 @@ const SimpleDinoGame: React.FC = () => {
       gameOver: false,
       isJumping: false,
       gameStartTime: Date.now(),
+      shouldSaveScore: false,
+      finalScore: undefined,
     });
   }, []);
 
@@ -140,10 +144,9 @@ const SimpleDinoGame: React.FC = () => {
 
       // Check if game just ended
       if (collision && !prev.gameOver) {
-        // Save score when game ends
-        addScore(newScore).catch(error => {
-          console.error('Error saving score:', error);
-        });
+        // Mark that we need to save the score (will be handled by useEffect)
+        prev.shouldSaveScore = true;
+        prev.finalScore = newScore;
       }
 
       return {
@@ -159,6 +162,22 @@ const SimpleDinoGame: React.FC = () => {
 
     animationFrameId.current = requestAnimationFrame(gameLoop);
   };
+
+  // Handle score saving when game ends
+  useEffect(() => {
+    if (gameState.gameOver && gameState.shouldSaveScore && gameState.finalScore !== undefined) {
+      addScore(gameState.finalScore).catch(error => {
+        console.error('Error saving score:', error);
+      });
+      
+      // Reset the flag to prevent multiple saves
+      setGameState(prev => ({
+        ...prev,
+        shouldSaveScore: false,
+        finalScore: undefined
+      }));
+    }
+  }, [gameState.gameOver, gameState.shouldSaveScore, gameState.finalScore, addScore]);
 
   useEffect(() => {
     animationFrameId.current = requestAnimationFrame(gameLoop);
