@@ -28,7 +28,7 @@ export class ScoreService implements IScoreService {
 
   // Generate unique ID for scores
   private generateScoreId(): string {
-    return `score_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `score_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   // Strategy Pattern: Different score calculation methods
