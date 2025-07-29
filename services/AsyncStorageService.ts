@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+
 import { STORAGE_KEYS, Score, ScoreCache, ScoreStats } from './types';
 
 // AsyncStorage Service - Single Responsibility: Data Persistence
@@ -16,11 +18,21 @@ export class AsyncStorageService {
     return AsyncStorageService.instance;
   }
 
+  // Platform-specific logging
+  private logPlatform(message: string, data?: any) {
+    const platform = Platform.OS;
+    const isWeb = Platform.OS === 'web';
+    console.log(`📱 [${platform.toUpperCase()}] ${message}`, data || '');
+  }
+
   // Generic storage methods with error handling
   private async setItem<T>(key: string, value: T): Promise<void> {
     try {
       const jsonValue = JSON.stringify(value);
+      this.logPlatform(`Saving ${key} - JSON size: ${jsonValue.length} bytes`);
+      
       await AsyncStorage.setItem(key, jsonValue);
+      this.logPlatform(`✅ Successfully saved ${key}`);
       
       // Update cache
       this.cache.set(key, {
@@ -29,7 +41,7 @@ export class AsyncStorageService {
         isValid: true,
       });
     } catch (error) {
-      console.error(`Error saving to AsyncStorage (${key}):`, error);
+      this.logPlatform(`❌ Error saving to AsyncStorage (${key}):`, error);
       throw new Error(`Failed to save data: ${error}`);
     }
   }
@@ -39,25 +51,36 @@ export class AsyncStorageService {
       // Check cache first for performance
       const cached = this.cache.get(key);
       if (cached && this.isCacheValid(cached)) {
+        this.logPlatform(`Cache hit for ${key}`);
         return cached.data as T;
       }
 
+      // Simple, direct read from AsyncStorage
       const jsonValue = await AsyncStorage.getItem(key);
+      
       if (jsonValue !== null) {
-        const data = JSON.parse(jsonValue) as T;
-        
-        // Update cache
-        this.cache.set(key, {
-          data: data as any,
-          timestamp: Date.now(),
-          isValid: true,
-        });
-        
-        return data;
+        try {
+          const data = JSON.parse(jsonValue) as T;
+          this.logPlatform(`✅ Successfully read ${key}:`, data);
+          
+          // Update cache
+          this.cache.set(key, {
+            data: data as any,
+            timestamp: Date.now(),
+            isValid: true,
+          });
+          
+          return data;
+        } catch (parseError) {
+          this.logPlatform(`❌ JSON parse error for ${key}:`, parseError);
+          return null;
+        }
       }
+      
+      this.logPlatform(`No data found for ${key}`);
       return null;
     } catch (error) {
-      console.error(`Error reading from AsyncStorage (${key}):`, error);
+      this.logPlatform(`❌ Error reading from AsyncStorage (${key}):`, error);
       return null;
     }
   }
@@ -70,11 +93,13 @@ export class AsyncStorageService {
 
   // Score-specific methods
   async saveTopScores(scores: Score[]): Promise<void> {
+    console.log('💾 AsyncStorage saveTopScores - Saving:', scores);
     await this.setItem(STORAGE_KEYS.TOP_SCORES, scores);
   }
 
   async getTopScores(): Promise<Score[]> {
     const scores = await this.getItem<Score[]>(STORAGE_KEYS.TOP_SCORES);
+    console.log('🔍 AsyncStorage getTopScores - Raw data:', scores);
     return scores || [];
   }
 
@@ -135,6 +160,22 @@ export class AsyncStorageService {
   // Cache management
   clearCache(): void {
     this.cache.clear();
+  }
+
+  // Force refresh from AsyncStorage (useful for platform differences)
+  async forceRefresh(): Promise<any> {
+    this.cache.clear();
+    
+    // Test read all keys
+    const allKeys = await AsyncStorage.getAllKeys();
+    
+    const results: Record<string, string | null> = {};
+    for (const key of Object.values(STORAGE_KEYS)) {
+      const value = await AsyncStorage.getItem(key);
+      results[key] = value;
+    }
+    
+    return { allKeys, results };
   }
 
   getCacheStats(): { size: number; keys: string[] } {
