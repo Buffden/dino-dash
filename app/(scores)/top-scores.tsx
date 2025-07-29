@@ -2,13 +2,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -25,7 +25,8 @@ export default function TopScoresScreen() {
     isLoading, 
     error, 
     refreshScores, 
-    clearScores 
+    clearScores,
+    forceRefreshData
   } = useScoreContext();
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -34,21 +35,30 @@ export default function TopScoresScreen() {
   useEffect(() => {
     // Load fresh data when screen mounts
     refreshScores();
-    
-    // Animate in
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-    ]).start();
   }, []);
+
+  // Animate when scores are loaded
+  useEffect(() => {
+    if (topScores.length > 0 && !isLoading) {
+      // Reset animations
+      fadeAnim.setValue(0);
+      slideAnim.setValue(30);
+      
+      // Animate in
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [topScores.length, isLoading]);
 
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -194,9 +204,9 @@ export default function TopScoresScreen() {
 
         {/* Scores Section */}
         <View style={styles.scoresSection}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Leaderboard
-          </ThemedText>
+                                  <ThemedText type="subtitle" style={styles.sectionTitle}>
+                          Leaderboard
+                        </ThemedText>
           
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -212,16 +222,16 @@ export default function TopScoresScreen() {
         </View>
 
         {/* Action Buttons */}
-        {topScores.length > 0 && (
-          <View style={styles.actionButtons}>
+        <View style={styles.actionButtons}>
+          {topScores.length > 0 && (
             <TouchableOpacity 
               style={styles.clearButton} 
               onPress={clearScores}
             >
               <Text style={styles.clearButtonText}>🗑️ Clear All</Text>
             </TouchableOpacity>
-          </View>
-        )}
+          )}
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -433,6 +443,20 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     alignItems: 'center',
+    gap: 10,
+  },
+  debugButton: {
+    backgroundColor: 'rgba(255, 165, 0, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 165, 0, 0.3)',
+  },
+  debugButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   clearButton: {
     backgroundColor: 'rgba(255, 0, 0, 0.2)',
@@ -447,4 +471,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  
 }); 

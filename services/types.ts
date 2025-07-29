@@ -50,6 +50,7 @@ export interface ScoreContextActions {
   refreshScores: () => Promise<void>;
   clearScores: () => Promise<void>;
   getNextTargetScore: (currentScore: number) => number;
+  forceRefreshData: () => Promise<void>;
 }
 
 // Combined Context Type
@@ -66,7 +67,7 @@ export const STORAGE_KEYS = {
 export const SCORE_CONSTANTS = {
   MAX_TOP_SCORES: 5,
   SCORE_CACHE_DURATION: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-  MIN_SCORE_TO_SAVE: 10, // Don't save scores below this threshold
+  MIN_SCORE_TO_SAVE: 1, // Don't save scores below this threshold
 } as const;
 
 // Performance Optimization Types

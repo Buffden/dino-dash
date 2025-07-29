@@ -1,4 +1,5 @@
 import React, { createContext, ReactNode, useContext, useEffect, useReducer } from 'react';
+import { asyncStorageService } from '../services/AsyncStorageService';
 import { scoreService } from '../services/ScoreService';
 import { Score, ScoreContextState, ScoreContextType } from '../services/types';
 
@@ -78,6 +79,31 @@ export const ScoreProvider: React.FC<ScoreProviderProps> = ({ children }) => {
     loadInitialData();
   }, []);
 
+  // Force refresh data (useful for debugging platform differences)
+  const forceRefreshData = async () => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      // Clear cache and force refresh
+      await asyncStorageService.forceRefresh();
+      
+      // Load data in parallel for better performance
+      const [topScores, highestScore, scoreStats] = await Promise.all([
+        scoreService.getTopScores(),
+        scoreService.getHighestScore(),
+        scoreService.getScoreStats(),
+      ]);
+
+      dispatch({ type: 'SET_TOP_SCORES', payload: topScores });
+      dispatch({ type: 'SET_HIGHEST_SCORE', payload: highestScore });
+      dispatch({ type: 'SET_SCORE_STATS', payload: scoreStats });
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      console.error('Error force refreshing data:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to refresh scores' });
+    }
+  };
+
   // Load initial scores and stats
   const loadInitialData = async () => {
     try {
@@ -97,6 +123,7 @@ export const ScoreProvider: React.FC<ScoreProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Error loading initial score data:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load scores' });
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -182,6 +209,7 @@ export const ScoreProvider: React.FC<ScoreProviderProps> = ({ children }) => {
     refreshScores,
     clearScores,
     getNextTargetScore,
+    forceRefreshData,
   };
 
   return (
