@@ -169,7 +169,7 @@ export class AsyncStorageService {
     // Test read all keys
     const allKeys = await AsyncStorage.getAllKeys();
     
-    const results: any = {};
+    const results: Record<string, string | null> = {};
     for (const key of Object.values(STORAGE_KEYS)) {
       const value = await AsyncStorage.getItem(key);
       results[key] = value;
