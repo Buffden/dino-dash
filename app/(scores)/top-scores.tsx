@@ -35,21 +35,30 @@ export default function TopScoresScreen() {
   useEffect(() => {
     // Load fresh data when screen mounts
     refreshScores();
-    
-    // Animate in
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-    ]).start();
   }, []);
+
+  // Animate when scores are loaded
+  useEffect(() => {
+    if (topScores.length > 0 && !isLoading) {
+      // Reset animations
+      fadeAnim.setValue(0);
+      slideAnim.setValue(30);
+      
+      // Animate in
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [topScores.length, isLoading]);
 
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -195,9 +204,9 @@ export default function TopScoresScreen() {
 
         {/* Scores Section */}
         <View style={styles.scoresSection}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Leaderboard
-          </ThemedText>
+                                  <ThemedText type="subtitle" style={styles.sectionTitle}>
+                          Leaderboard
+                        </ThemedText>
           
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -214,13 +223,6 @@ export default function TopScoresScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity 
-            style={styles.debugButton} 
-            onPress={forceRefreshData}
-          >
-            <Text style={styles.debugButtonText}>🔧 Debug Refresh</Text>
-          </TouchableOpacity>
-          
           {topScores.length > 0 && (
             <TouchableOpacity 
               style={styles.clearButton} 
@@ -469,4 +471,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  
 }); 

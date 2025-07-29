@@ -123,6 +123,7 @@ export const ScoreProvider: React.FC<ScoreProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Error loading initial score data:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load scores' });
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 

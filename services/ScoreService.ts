@@ -152,16 +152,11 @@ export class ScoreService implements IScoreService {
   // Get comprehensive score statistics
   async getScoreStats(): Promise<ScoreStats> {
     try {
-      const cachedStats = await asyncStorageService.getScoreStats();
-      if (cachedStats) {
-        return cachedStats;
-      }
-
-      // Calculate stats from top scores
+      // Always calculate stats from fresh top scores instead of using cached stats
       const topScores = await this.getTopScores();
       const stats = this.calculateScoreStats(topScores);
       
-      // Cache the stats
+      // Cache the stats for future use
       await asyncStorageService.saveScoreStats(stats);
       
       return stats;

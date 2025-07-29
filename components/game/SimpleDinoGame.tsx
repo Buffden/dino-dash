@@ -22,7 +22,7 @@ const GRAVITY = 0.8;
 const JUMP_VELOCITY = -15;
 const GROUND_Y = height - 200;
 const DINO_SIZE = 50;
-const DINO_WIDTH = 35; // Reduced width for collision detection
+const DINO_WIDTH = 40; // Slightly larger for better collision detection
 const DINO_HEIGHT = 50; // Keep height the same
 const OBSTACLE_WIDTH = 30;
 const OBSTACLE_HEIGHT = 50;
@@ -73,8 +73,8 @@ const SimpleDinoGame: React.FC = () => {
 
   const checkCollision = (dinoY: number, obstacles: GameState['obstacles']) => {
     const dinoBounds = {
-      left: 50,
-      right: 50 + DINO_WIDTH,
+      left: 45, // Slightly adjusted for better collision detection
+      right: 45 + DINO_WIDTH,
       top: dinoY,
       bottom: dinoY + DINO_HEIGHT,
     };
@@ -144,9 +144,17 @@ const SimpleDinoGame: React.FC = () => {
 
       // Check if game just ended
       if (collision && !prev.gameOver) {
-        // Mark that we need to save the score (will be handled by useEffect)
-        prev.shouldSaveScore = true;
-        prev.finalScore = newScore;
+        return {
+          ...prev,
+          dinoY: newDinoY,
+          dinoVelocity: newDinoVelocity,
+          obstacles: newObstacles,
+          score: newScore,
+          gameOver: true,
+          isJumping,
+          shouldSaveScore: true,
+          finalScore: newScore,
+        };
       }
 
       return {
@@ -155,7 +163,7 @@ const SimpleDinoGame: React.FC = () => {
         dinoVelocity: newDinoVelocity,
         obstacles: newObstacles,
         score: newScore,
-        gameOver: collision,
+        gameOver: false, // No collision, game continues
         isJumping,
       };
     });
@@ -314,6 +322,8 @@ const SimpleDinoGame: React.FC = () => {
         {gameState.gameOver && renderGameOver()}
       </View>
       
+
+      
       {/* Separate touch area for jumping that doesn't interfere with UI elements */}
       {!gameState.gameOver && (
         <TouchableOpacity 
@@ -337,7 +347,7 @@ const styles = StyleSheet.create({
   },
   dinoContainer: {
     position: 'absolute',
-    left: 50,
+    left: 45, // Match collision bounds
     width: DINO_WIDTH,
     height: DINO_HEIGHT,
   },
@@ -572,7 +582,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10,
+    zIndex: 1000,
     padding: 20,
   },
   gameOverText: {
